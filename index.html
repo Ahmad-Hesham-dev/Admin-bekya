@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Future Skills – Student-Led Learning Platform</title>
+    <link rel="icon" href="" type="image/x-icon">
+    <!-- Insert favicon link above -->
+    
+    <style>
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4 {
+            color: #1e293b;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo h2 {
+            font-size: 1.8rem;
+            color: #3b82f6;
+            margin: 0;
+        }
+        
+        .logo h2::after {
+            display: none;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #475569;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: #3b82f6;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            text-align: center;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: #475569;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
+        }
+        
+        /* Courses Section */
+        .courses {
+            padding: 80px 0;
+        }
+        
+        .courses-intro {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 50px;
+        }
+        
+        .course-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .course-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .course-img {
+            width: 100%;
+            height: 180px;
+            background-color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-weight: 600;
+        }
+        
+        .course-content {
+            padding: 25px;
+        }
+        
+        .course-content p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            color: #64748b;
+        }
+        
+        .btn-outline {
+            display: inline-block;
+            background-color: transparent;
+            color: #3b82f6;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid #3b82f6;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline:hover {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        /* Video Section */
+        .video-section {
+            padding: 80px 0;
+            background-color: #f1f5f9;
+        }
+        
+        .video-container {
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            height: 500px;
+            background-color: #1e293b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .video-placeholder h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        /* Interactive Section */
+        .interactive {
+            padding: 80px 0;
+        }
+        
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .quiz-question {
+            margin-bottom: 30px;
+        }
+        
+        .quiz-question h3 {
+            margin-bottom: 20px;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .quiz-option {
+            padding: 15px;
+            background-color: #f8fafc;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quiz-option:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        .quiz-option.selected {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        .quiz-option.correct {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+        
+        .quiz-option.incorrect {
+            border-color: #ef4444;
+            background-color: #fee2e2;
+        }
+        
+        .quiz-feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .quiz-feedback.correct {
+            background-color: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+        
+        .quiz-feedback.incorrect {
+            background-color: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-section h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #3b82f6;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                gap: 20px;
+            }
+            
+            .video-placeholder {
+                height: 300px;
+            }
+            
+            .quiz-container {
+                padding: 25px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .course-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <!-- Insert logo image here -->
+                    <!-- <img src="" alt="Future Skills Logo" width="40" height="40"> -->
+                    <h2>Future Skills</h2>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#courses">Courses</a></li>
+                        <li><a href="#video">Video Lessons</a></li>
+                        <li><a href="#interactive">Practice</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Learn Future Skills Today</h1>
+            <p>A student-led platform where you can learn programming, design, media creation, and AI concepts through short, engaging lessons and hands-on practice.</p>
+            <a href="#courses" class="btn">Start Learning Now</a>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section class="courses" id="courses">
+        <div class="container">
+            <h2>Our Learning Tracks</h2>
+            <div class="courses-intro">
+                <p>Choose from our beginner-friendly courses designed by students for students. Each track includes short lessons, practice exercises, and real-world projects.</p>
+            </div>
+            
+            <div class="course-cards">
+                <!-- Programming Course Card -->
+                <div class="course-card">
+                    <div class="course-img">
+                        <!-- Insert programming course image: illustration of code or programming -->
+                        <!-- <img src="" alt="Programming Course" width="100%"> -->
+                        Programming Course Image
+                    </div>
+                    <div class="course-content">
+                        <h3>Programming Basics</h3>
+                        <p>Learn the fundamentals of coding with Python and JavaScript. Build simple apps, games, and websites through step-by-step tutorials.</p>
+                        <a href="#" class="btn-outline">Start Course</a>
+                    </div>
+                </div>
+                
+                <!-- Design Course Card -->
+                <div class="course-card">
+                    <div class="course-img">
+                        <!-- Insert design course image: illustration of design tools or UI/UX -->
+                        <!-- <img src="" alt="Design Course" width="100%"> -->
+                        Design Course Image
+                    </div>
+                    <div class="course-content">
+                        <h3>Digital Design</h3>
+                        <p>Master the basics of UI/UX design, graphic design principles, and tools like Figma. Create beautiful interfaces and digital art.</p>
+                        <a href="#" class="btn-outline">Start Course</a>
+                    </div>
+                </div>
+                
+                <!-- Media Course Card -->
+                <div class="course-card">
+                    <div class="course-img">
+                        <!-- Insert media course image: illustration of video editing or content creation -->
+                        <!-- <img src="" alt="Media Course" width="100%"> -->
+                        Media Course Image
+                    </div>
+                    <div class="course-content">
+                        <h3>Media Creation</h3>
+                        <p>Learn video editing, podcasting, and digital storytelling. Create engaging content for YouTube, TikTok, and other platforms.</p>
+                        <a href="#" class="btn-outline">Start Course</a>
+                    </div>
+                </div>
+                
+                <!-- AI Concepts Course Card -->
+                <div class="course-card">
+                    <div class="course-img">
+                        <!-- Insert AI course image: illustration of AI or machine learning -->
+                        <!-- <img src="" alt="AI Concepts Course" width="100%"> -->
+                        AI Concepts Course Image
+                    </div>
+                    <div class="course-content">
+                        <h3>AI Concepts</h3>
+                        <p>Understand artificial intelligence, machine learning, and how they shape our world. No complex math required!</p>
+                        <a href="#" class="btn-outline">Start Course</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Lesson Section -->
+    <section class="video-section" id="video">
+        <div class="container">
+            <h2>Featured Video Lesson</h2>
+            <div class="video-container">
+                <div class="video-placeholder">
+                    <h3>Video Player</h3>
+                    <p>Insert YouTube video embed code here</p>
+                    <!-- Insert YouTube video iframe for featured lesson -->
+                    <!-- Example: <iframe src="" width="100%" height="100%" frameborder="0" allowfullscreen></iframe> -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Quiz Section -->
+    <section class="interactive" id="interactive">
+        <div class="container">
+            <h2>Test Your Knowledge</h2>
+            <div class="quiz-container">
+                <div class="quiz-question">
+                    <h3>What is the main purpose of a "loop" in programming?</h3>
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false">To store data in memory</div>
+                        <div class="quiz-option" data-correct="true">To repeat a set of instructions multiple times</div>
+                        <div class="quiz-option" data-correct="false">To make decisions in code</div>
+                        <div class="quiz-option" data-correct="false">To display text on the screen</div>
+                    </div>
+                </div>
+                
+                <div class="quiz-feedback">
+                    <!-- Feedback will appear here after answer selection -->
+                </div>
+                
+                <button class="btn" id="check-answer">Check Answer</button>
+                <button class="btn-outline" id="next-question" style="margin-left: 15px; display: none;">Next Question</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Future Skills</h3>
+                    <p>A student-led platform for learning essential future skills through short, engaging lessons.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#courses">Courses</a></li>
+                        <li><a href="#video">Video Lessons</a></li>
+                        <li><a href="#interactive">Practice</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Connect With Us</h3>
+                    <ul class="footer-links">
+                        <li><a href="" target="_blank">YouTube Channel</a></li>
+                        <!-- Insert YouTube channel link above -->
+                        <li><a href="" target="_blank">Student Community</a></li>
+                        <!-- Insert community/discord link above -->
+                        <li><a href="" target="_blank">Learning Resources</a></li>
+                        <!-- Insert resources link above -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 Future Skills – Student-Led Learning Platform. All educational content is free to use.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Interactive Quiz Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const quizOptions = document.querySelectorAll('.quiz-option');
+            const checkAnswerBtn = document.getElementById('check-answer');
+            const nextQuestionBtn = document.getElementById('next-question');
+            const feedbackDiv = document.querySelector('.quiz-feedback');
+            
+            let selectedOption = null;
+            
+            // Add click event to each quiz option
+            quizOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove selected class from all options
+                    quizOptions.forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
+                    selectedOption = this;
+                    
+                    // Reset any previous feedback
+                    feedbackDiv.className = 'quiz-feedback';
+                    feedbackDiv.textContent = '';
+                    nextQuestionBtn.style.display = 'none';
+                });
+            });
+            
+            // Check answer button functionality
+            checkAnswerBtn.addEventListener('click', function() {
+                if (!selectedOption) {
+                    feedbackDiv.className = 'quiz-feedback incorrect';
+                    feedbackDiv.textContent = 'Please select an answer first!';
+                    return;
+                }
+                
+                const isCorrect = selectedOption.getAttribute('data-correct') === 'true';
+                
+                // Show correct/incorrect styling
+                quizOptions.forEach(option => {
+                    option.classList.remove('correct', 'incorrect');
+                    
+                    if (option.getAttribute('data-correct') === 'true') {
+                        option.classList.add('correct');
+                    } else if (option === selectedOption && !isCorrect) {
+                        option.classList.add('incorrect');
+                    }
+                });
+                
+                // Show feedback
+                if (isCorrect) {
+                    feedbackDiv.className = 'quiz-feedback correct';
+                    feedbackDiv.textContent = 'Correct! Loops are used to repeat code multiple times, which saves time and makes programs more efficient.';
+                } else {
+                    feedbackDiv.className = 'quiz-feedback incorrect';
+                    feedbackDiv.textContent = 'Not quite! The correct answer is: "To repeat a set of instructions multiple times". Loops help automate repetitive tasks in programming.';
+                }
+                
+                // Show next question button
+                nextQuestionBtn.style.display = 'inline-block';
+            });
+            
+            // Next question button functionality (demo - would load next question in full implementation)
+            nextQuestionBtn.addEventListener('click', function() {
+                // Reset quiz for next question
+                quizOptions.forEach(option => {
+                    option.classList.remove('selected', 'correct', 'incorrect');
+                });
+                
+                feedbackDiv.className = 'quiz-feedback';
+                feedbackDiv.textContent = '';
+                selectedOption = null;
+                nextQuestionBtn.style.display = 'none';
+                
+                // In a full implementation, this would load the next question
+                alert('In the full platform, this would load the next question! For now, the quiz has been reset.');
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('nav a, .btn[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    
+                    // Only handle internal links
+                    if (href.startsWith('#')) {
+                        e.preventDefault();
+                        
+                        const targetId = href.substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            window.scrollTo({
+                                top: targetElement.offsetTop - 80,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // Simple course enrollment simulation
+            document.querySelectorAll('.btn-outline').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        const courseTitle = this.closest('.course-content').querySelector('h3').textContent;
+                        alert(`You've enrolled in "${courseTitle}"! In the full platform, you would be redirected to the course lessons.`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
