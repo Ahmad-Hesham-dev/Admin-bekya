@@ -199,7 +199,7 @@
 
       const dbOutlet = new Dexie('RecycleOutletDB');
       // ensure records store has userId index
-      dbOutlet.version(2).stores({ records: '++id, sellerName, phone, materialType, weight, timestamp, points, userId' });
+      dbOutlet.version(2).stores({ records: '++id, sellerName, phone, materialType, materialweight, timestamp, materialpoints, userId' });
 
       await Promise.all([dbUsers.open(), dbOutlet.open()]);
 
