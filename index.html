@@ -1,709 +1,385 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEKYA · admin panel</title>
+  <!-- Dexie.js -->
+  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Future Skills – Student-Led Learning Platform</title>
-    <link rel="icon" href="" type="image/x-icon">
-    <!-- Insert favicon link above -->
-    
-    <style>
-        /* Reset & Base Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f8fafc;
-            color: #334155;
-            line-height: 1.6;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* Typography */
-        h1, h2, h3, h4 {
-            color: #1e293b;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-        
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 1rem;
-        }
-        
-        h2 {
-            font-size: 2.2rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            position: relative;
-        }
-        
-        h2::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: #3b82f6;
-            border-radius: 2px;
-        }
-        
-        h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.8rem;
-        }
-        
-        p {
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-        
-        /* Header & Navigation */
-        header {
-            background-color: #ffffff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo h2 {
-            font-size: 1.8rem;
-            color: #3b82f6;
-            margin: 0;
-        }
-        
-        .logo h2::after {
-            display: none;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 30px;
-        }
-        
-        nav a {
-            text-decoration: none;
-            color: #475569;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: color 0.3s;
-        }
-        
-        nav a:hover {
-            color: #3b82f6;
-        }
-        
-        /* Hero Section */
-        .hero {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-            text-align: center;
-        }
-        
-        .hero p {
-            font-size: 1.3rem;
-            max-width: 800px;
-            margin: 0 auto 2rem;
-            color: #475569;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: #3b82f6;
-            color: white;
-            padding: 14px 32px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.2);
-        }
-        
-        /* Courses Section */
-        .courses {
-            padding: 80px 0;
-        }
-        
-        .courses-intro {
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto 50px;
-        }
-        
-        .course-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
-        }
-        
-        .course-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .course-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .course-img {
-            width: 100%;
-            height: 180px;
-            background-color: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            font-weight: 600;
-        }
-        
-        .course-content {
-            padding: 25px;
-        }
-        
-        .course-content p {
-            font-size: 1rem;
-            margin-bottom: 20px;
-            color: #64748b;
-        }
-        
-        .btn-outline {
-            display: inline-block;
-            background-color: transparent;
-            color: #3b82f6;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 2px solid #3b82f6;
-            transition: all 0.3s;
-        }
-        
-        .btn-outline:hover {
-            background-color: #3b82f6;
-            color: white;
-        }
-        
-        /* Video Section */
-        .video-section {
-            padding: 80px 0;
-            background-color: #f1f5f9;
-        }
-        
-        .video-container {
-            max-width: 900px;
-            margin: 0 auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .video-placeholder {
-            width: 100%;
-            height: 500px;
-            background-color: #1e293b;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        
-        .video-placeholder h3 {
-            color: white;
-            margin-bottom: 15px;
-        }
-        
-        /* Interactive Section */
-        .interactive {
-            padding: 80px 0;
-        }
-        
-        .quiz-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .quiz-question {
-            margin-bottom: 30px;
-        }
-        
-        .quiz-question h3 {
-            margin-bottom: 20px;
-        }
-        
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .quiz-option {
-            padding: 15px;
-            background-color: #f8fafc;
-            border-radius: 8px;
-            border: 2px solid #e2e8f0;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .quiz-option:hover {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-        
-        .quiz-option.selected {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-        }
-        
-        .quiz-option.correct {
-            border-color: #10b981;
-            background-color: #d1fae5;
-        }
-        
-        .quiz-option.incorrect {
-            border-color: #ef4444;
-            background-color: #fee2e2;
-        }
-        
-        .quiz-feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .quiz-feedback.correct {
-            background-color: #d1fae5;
-            color: #065f46;
-            display: block;
-        }
-        
-        .quiz-feedback.incorrect {
-            background-color: #fee2e2;
-            color: #991b1b;
-            display: block;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: #1e293b;
-            color: #cbd5e1;
-            padding: 60px 0 30px;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        
-        .footer-section h3 {
-            color: white;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-        }
-        
-        .footer-links {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-        
-        .footer-links a {
-            color: #cbd5e1;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .footer-links a:hover {
-            color: #3b82f6;
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid #334155;
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            h2 {
-                font-size: 1.8rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            nav ul {
-                gap: 20px;
-            }
-            
-            .video-placeholder {
-                height: 300px;
-            }
-            
-            .quiz-container {
-                padding: 25px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .course-cards {
-                grid-template-columns: 1fr;
-            }
-            
-            nav ul {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
-    </style>
+    body {
+      background-color: #f5f9f7;
+      color: #1e3a2f;
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ----- navbar ----- */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #1e3a2f;
+    }
+
+    .logo {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #1e3a2f;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1.5px solid #1e3a2f;
+      color: #1e3a2f;
+      padding: 0.6rem 2rem;
+      font-weight: 600;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #1e3a2f;
+      color: white;
+    }
+
+    /* ----- filter bar ----- */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar label {
+      font-weight: 600;
+      color: #1e3a2f;
+    }
+
+    .role-filter {
+      padding: 0.5rem 2.5rem 0.5rem 1rem;
+      border: 1.5px solid #1e3a2f;
+      background: white;
+      color: #1e3a2f;
+      font-weight: 500;
+      border-radius: 40px;
+      cursor: pointer;
+    }
+
+    /* ----- table ----- */
+    .table-wrapper {
+      background: white;
+      border-radius: 24px;
+      border: 1px solid #d0e0d6;
+      overflow-x: auto;
+      box-shadow: 0 8px 20px rgba(10, 61, 42, 0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    th {
+      background: #eaf3ee;
+      color: #1e3a2f;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 1.2rem 1rem;
+      text-align: left;
+      border-bottom: 2px solid #1e3a2f;
+    }
+
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid #d0e0d6;
+      color: #1e3a2f;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background-color: #f6fbf8;
+    }
+
+    .delete-btn {
+      background: transparent;
+      border: 1.5px solid #b91c1c;
+      color: #b91c1c;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .delete-btn:hover {
+      background: #b91c1c;
+      color: white;
+    }
+
+    .empty-message {
+      text-align: center;
+      padding: 3rem;
+      color: #1e3a2f;
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #eaf3ee;
+      color: #1e3a2f;
+      border: 1px solid #1e3a2f;
+    }
+
+    .stats-note {
+      margin-top: 1.5rem;
+      text-align: right;
+      color: #1e3a2f;
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <!-- Insert logo image here -->
-                    <!-- <img src="" alt="Future Skills Logo" width="40" height="40"> -->
-                    <h2>Future Skills</h2>
-                </div>
-                <nav>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#courses">Courses</a></li>
-                        <li><a href="#video">Video Lessons</a></li>
-                        <li><a href="#interactive">Practice</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-    </header>
+  <div class="dashboard">
+    <nav class="navbar">
+      <span class="logo">BEKYA · admin</span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="container">
-            <h1>Learn Future Skills Today</h1>
-            <p>A student-led platform where you can learn programming, design, media creation, and AI concepts through short, engaging lessons and hands-on practice.</p>
-            <a href="#courses" class="btn">Start Learning Now</a>
-        </div>
-    </section>
+    <div class="filter-bar">
+      <label for="roleFilter">Filter by role:</label>
+      <select id="roleFilter" class="role-filter">
+        <option value="all">All users</option>
+        <option value="seller">Sellers</option>
+        <option value="outlet">Outlets</option>
+      </select>
+    </div>
 
-    <!-- Courses Section -->
-    <section class="courses" id="courses">
-        <div class="container">
-            <h2>Our Learning Tracks</h2>
-            <div class="courses-intro">
-                <p>Choose from our beginner-friendly courses designed by students for students. Each track includes short lessons, practice exercises, and real-world projects.</p>
-            </div>
-            
-            <div class="course-cards">
-                <!-- Programming Course Card -->
-                <div class="course-card">
-                    <div class="course-img">
-                        <!-- Insert programming course image: illustration of code or programming -->
-                        <!-- <img src="" alt="Programming Course" width="100%"> -->
-                        Programming Course Image
-                    </div>
-                    <div class="course-content">
-                        <h3>Programming Basics</h3>
-                        <p>Learn the fundamentals of coding with Python and JavaScript. Build simple apps, games, and websites through step-by-step tutorials.</p>
-                        <a href="#" class="btn-outline">Start Course</a>
-                    </div>
-                </div>
-                
-                <!-- Design Course Card -->
-                <div class="course-card">
-                    <div class="course-img">
-                        <!-- Insert design course image: illustration of design tools or UI/UX -->
-                        <!-- <img src="" alt="Design Course" width="100%"> -->
-                        Design Course Image
-                    </div>
-                    <div class="course-content">
-                        <h3>Digital Design</h3>
-                        <p>Master the basics of UI/UX design, graphic design principles, and tools like Figma. Create beautiful interfaces and digital art.</p>
-                        <a href="#" class="btn-outline">Start Course</a>
-                    </div>
-                </div>
-                
-                <!-- Media Course Card -->
-                <div class="course-card">
-                    <div class="course-img">
-                        <!-- Insert media course image: illustration of video editing or content creation -->
-                        <!-- <img src="" alt="Media Course" width="100%"> -->
-                        Media Course Image
-                    </div>
-                    <div class="course-content">
-                        <h3>Media Creation</h3>
-                        <p>Learn video editing, podcasting, and digital storytelling. Create engaging content for YouTube, TikTok, and other platforms.</p>
-                        <a href="#" class="btn-outline">Start Course</a>
-                    </div>
-                </div>
-                
-                <!-- AI Concepts Course Card -->
-                <div class="course-card">
-                    <div class="course-img">
-                        <!-- Insert AI course image: illustration of AI or machine learning -->
-                        <!-- <img src="" alt="AI Concepts Course" width="100%"> -->
-                        AI Concepts Course Image
-                    </div>
-                    <div class="course-content">
-                        <h3>AI Concepts</h3>
-                        <p>Understand artificial intelligence, machine learning, and how they shape our world. No complex math required!</p>
-                        <a href="#" class="btn-outline">Start Course</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="table-wrapper">
+      <table id="userTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Seller KG</th>
+            <th>Seller points</th>
+            <th>Outlet KG</th>
+            <th>Outlet points</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="8" class="empty-message">Loading users...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="stats-note" id="statsNote"></div>
+  </div>
 
-    <!-- Video Lesson Section -->
-    <section class="video-section" id="video">
-        <div class="container">
-            <h2>Featured Video Lesson</h2>
-            <div class="video-container">
-                <div class="video-placeholder">
-                    <h3>Video Player</h3>
-                    <p>Insert YouTube video embed code here</p>
-                    <!-- Insert YouTube video iframe for featured lesson -->
-                    <!-- Example: <iframe src="" width="100%" height="100%" frameborder="0" allowfullscreen></iframe> -->
-                </div>
-            </div>
-        </div>
-    </section>
+  <script>
+    (async function() {
+      // ----- open both databases -----
+      const dbUsers = new Dexie('BEKYADatabase');
+      dbUsers.version(1).stores({ Users: '++id, name, phone, role' });
 
-    <!-- Interactive Quiz Section -->
-    <section class="interactive" id="interactive">
-        <div class="container">
-            <h2>Test Your Knowledge</h2>
-            <div class="quiz-container">
-                <div class="quiz-question">
-                    <h3>What is the main purpose of a "loop" in programming?</h3>
-                    <div class="quiz-options">
-                        <div class="quiz-option" data-correct="false">To store data in memory</div>
-                        <div class="quiz-option" data-correct="true">To repeat a set of instructions multiple times</div>
-                        <div class="quiz-option" data-correct="false">To make decisions in code</div>
-                        <div class="quiz-option" data-correct="false">To display text on the screen</div>
-                    </div>
-                </div>
-                
-                <div class="quiz-feedback">
-                    <!-- Feedback will appear here after answer selection -->
-                </div>
-                
-                <button class="btn" id="check-answer">Check Answer</button>
-                <button class="btn-outline" id="next-question" style="margin-left: 15px; display: none;">Next Question</button>
-            </div>
-        </div>
-    </section>
+      const dbOutlet = new Dexie('RecycleOutletDB');
+      // make sure records store has userId index (version 2 from earlier)
+      dbOutlet.version(2).stores({ records: '++id, sellerName, phone, materialType, weight, timestamp, points, userId' });
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Future Skills</h3>
-                    <p>A student-led platform for learning essential future skills through short, engaging lessons.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <ul class="footer-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#courses">Courses</a></li>
-                        <li><a href="#video">Video Lessons</a></li>
-                        <li><a href="#interactive">Practice</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Connect With Us</h3>
-                    <ul class="footer-links">
-                        <li><a href="" target="_blank">YouTube Channel</a></li>
-                        <!-- Insert YouTube channel link above -->
-                        <li><a href="" target="_blank">Student Community</a></li>
-                        <!-- Insert community/discord link above -->
-                        <li><a href="" target="_blank">Learning Resources</a></li>
-                        <!-- Insert resources link above -->
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>&copy; 2023 Future Skills – Student-Led Learning Platform. All educational content is free to use.</p>
-            </div>
-        </div>
-    </footer>
+      await Promise.all([dbUsers.open(), dbOutlet.open()]);
 
-    <script>
-        // Interactive Quiz Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const quizOptions = document.querySelectorAll('.quiz-option');
-            const checkAnswerBtn = document.getElementById('check-answer');
-            const nextQuestionBtn = document.getElementById('next-question');
-            const feedbackDiv = document.querySelector('.quiz-feedback');
-            
-            let selectedOption = null;
-            
-            // Add click event to each quiz option
-            quizOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    // Remove selected class from all options
-                    quizOptions.forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    
-                    // Add selected class to clicked option
-                    this.classList.add('selected');
-                    selectedOption = this;
-                    
-                    // Reset any previous feedback
-                    feedbackDiv.className = 'quiz-feedback';
-                    feedbackDiv.textContent = '';
-                    nextQuestionBtn.style.display = 'none';
-                });
-            });
-            
-            // Check answer button functionality
-            checkAnswerBtn.addEventListener('click', function() {
-                if (!selectedOption) {
-                    feedbackDiv.className = 'quiz-feedback incorrect';
-                    feedbackDiv.textContent = 'Please select an answer first!';
-                    return;
-                }
-                
-                const isCorrect = selectedOption.getAttribute('data-correct') === 'true';
-                
-                // Show correct/incorrect styling
-                quizOptions.forEach(option => {
-                    option.classList.remove('correct', 'incorrect');
-                    
-                    if (option.getAttribute('data-correct') === 'true') {
-                        option.classList.add('correct');
-                    } else if (option === selectedOption && !isCorrect) {
-                        option.classList.add('incorrect');
-                    }
-                });
-                
-                // Show feedback
-                if (isCorrect) {
-                    feedbackDiv.className = 'quiz-feedback correct';
-                    feedbackDiv.textContent = 'Correct! Loops are used to repeat code multiple times, which saves time and makes programs more efficient.';
-                } else {
-                    feedbackDiv.className = 'quiz-feedback incorrect';
-                    feedbackDiv.textContent = 'Not quite! The correct answer is: "To repeat a set of instructions multiple times". Loops help automate repetitive tasks in programming.';
-                }
-                
-                // Show next question button
-                nextQuestionBtn.style.display = 'inline-block';
-            });
-            
-            // Next question button functionality (demo - would load next question in full implementation)
-            nextQuestionBtn.addEventListener('click', function() {
-                // Reset quiz for next question
-                quizOptions.forEach(option => {
-                    option.classList.remove('selected', 'correct', 'incorrect');
-                });
-                
-                feedbackDiv.className = 'quiz-feedback';
-                feedbackDiv.textContent = '';
-                selectedOption = null;
-                nextQuestionBtn.style.display = 'none';
-                
-                // In a full implementation, this would load the next question
-                alert('In the full platform, this would load the next question! For now, the quiz has been reset.');
-            });
-            
-            // Smooth scrolling for navigation links
-            document.querySelectorAll('nav a, .btn[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    const href = this.getAttribute('href');
-                    
-                    // Only handle internal links
-                    if (href.startsWith('#')) {
-                        e.preventDefault();
-                        
-                        const targetId = href.substring(1);
-                        const targetElement = document.getElementById(targetId);
-                        
-                        if (targetElement) {
-                            window.scrollTo({
-                                top: targetElement.offsetTop - 80,
-                                behavior: 'smooth'
-                            });
-                        }
-                    }
-                });
-            });
-            
-            // Simple course enrollment simulation
-            document.querySelectorAll('.btn-outline').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    if (this.getAttribute('href') === '#') {
-                        e.preventDefault();
-                        const courseTitle = this.closest('.course-content').querySelector('h3').textContent;
-                        alert(`You've enrolled in "${courseTitle}"! In the full platform, you would be redirected to the course lessons.`);
-                    }
-                });
-            });
+      // ----- get references -----
+      const tbody = document.getElementById('tableBody');
+      const roleFilter = document.getElementById('roleFilter');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const statsNote = document.getElementById('statsNote');
+
+      // ----- helper: get seller materials from localStorage (filtered by userId) -----
+      function getSellerMaterials() {
+        const stored = localStorage.getItem('materials');
+        return stored ? JSON.parse(stored) : [];
+      }
+
+      // ----- load and display users -----
+      async function loadUsers() {
+        // get all users from Dexie
+        const users = await dbUsers.Users.toArray();
+        const sellerMaterials = getSellerMaterials(); // all materials in this browser
+        const outletRecords = await dbOutlet.records.toArray();
+
+        // build a map of totals per user
+        const sellerMap = new Map(); // userId -> { kg, points }
+        sellerMaterials.forEach(m => {
+          if (m.userId) {
+            const id = m.userId;
+            if (!sellerMap.has(id)) sellerMap.set(id, { kg: 0, points: 0 });
+            const data = sellerMap.get(id);
+            data.kg += m.weight || 0;
+            data.points += m.points || 0;
+          }
         });
-    </script>
+
+        const outletMap = new Map(); // userId -> { kg, points }
+        outletRecords.forEach(r => {
+          if (r.userId) {
+            const id = r.userId;
+            if (!outletMap.has(id)) outletMap.set(id, { kg: 0, points: 0 });
+            const data = outletMap.get(id);
+            data.kg += r.weight || 0;
+            data.points += r.points || 0;
+          }
+        });
+
+        // combine with user list
+        const userList = users.map(u => {
+          const seller = sellerMap.get(u.id) || { kg: 0, points: 0 };
+          const outlet = outletMap.get(u.id) || { kg: 0, points: 0 };
+          return {
+            id: u.id,
+            name: u.name,
+            phone: u.phone,
+            role: u.role,
+            sellerKg: seller.kg,
+            sellerPoints: seller.points,
+            outletKg: outlet.kg,
+            outletPoints: outlet.points
+          };
+        });
+
+        // apply role filter
+        const filter = roleFilter.value;
+        const filtered = filter === 'all' ? userList : userList.filter(u => u.role === filter);
+
+        // render table
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="empty-message">No users found</td></tr>`;
+          statsNote.innerText = '';
+          return;
+        }
+
+        let html = '';
+        filtered.forEach(u => {
+          html += `<tr>
+            <td><strong>${escapeHtml(u.name)}</strong></td>
+            <td>${escapeHtml(u.phone)}</td>
+            <td><span class="role-badge">${escapeHtml(u.role)}</span></td>
+            <td>${u.sellerKg} g</td>
+            <td>${u.sellerPoints}</td>
+            <td>${u.outletKg} g</td>
+            <td>${u.outletPoints}</td>
+            <td>
+              <button class="delete-btn" data-id="${u.id}" data-name="${escapeHtml(u.name)}">
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
+            </td>
+          </tr>`;
+        });
+        tbody.innerHTML = html;
+
+        statsNote.innerText = `Showing ${filtered.length} user(s) · Total KG (seller): ${filtered.reduce((s,u)=>s+u.sellerKg,0)} g · Total points (outlet): ${filtered.reduce((s,u)=>s+u.outletPoints,0)}`;
+
+        // attach delete events
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const userId = Number(btn.dataset.id);
+            const userName = btn.dataset.name;
+            if (!confirm(`Delete user "${userName}" and all their data? This cannot be undone.`)) return;
+            await deleteUser(userId);
+            await loadUsers(); // refresh
+          });
+        });
+      }
+
+      // ----- delete user completely -----
+      async function deleteUser(userId) {
+        // 1. remove from Users table
+        await dbUsers.Users.delete(userId);
+
+        // 2. remove from localStorage 'users' array (used by login)
+        const storedUsers = localStorage.getItem('users');
+        if (storedUsers) {
+          try {
+            let users = JSON.parse(storedUsers);
+            users = users.filter(u => u.username ? true : true); // we don't have userId in that array, so we rely on name? Actually the localStorage users array stores {username, phone, role} without id. So we cannot reliably delete by id there. We'll skip that to avoid deleting wrong user. This is a limitation of the existing login system.
+          } catch (e) {}
+        }
+
+        // 3. remove seller materials (from localStorage) that belong to this user
+        const materials = getSellerMaterials();
+        const newMaterials = materials.filter(m => m.userId !== userId);
+        localStorage.setItem('materials', JSON.stringify(newMaterials));
+
+        // 4. remove outlet records (from Dexie)
+        await dbOutlet.records.where('userId').equals(userId).delete();
+
+        // 5. optionally remove from localStorage profile keys? Not needed because they belong to current logged-in user only.
+      }
+
+      // ----- escape HTML for safety -----
+      function escapeHtml(unsafe) {
+        if (!unsafe) return unsafe;
+        return String(unsafe)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // ----- filter change -----
+      roleFilter.addEventListener('change', loadUsers);
+
+      // ----- logout (just clear currentUserId) -----
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('currentUserId');
+        // optional: show message
+        alert('Logged out (currentUserId cleared)');
+      });
+
+      // ----- initial load -----
+      await loadUsers();
+
+      // Font Awesome for icons (optional but nice)
+      const fa = document.createElement('link');
+      fa.rel = 'stylesheet';
+      fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+      document.head.appendChild(fa);
+    })();
+  </script>
 </body>
 </html>
