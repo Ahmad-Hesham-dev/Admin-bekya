@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BEKYA · admin panel</title>
+  <title>BEKYA · admin panel (fixed sums)</title>
   <!-- Dexie.js -->
   <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
   <style>
@@ -26,7 +26,6 @@
       margin: 0 auto;
     }
 
-    /* ----- navbar (logout button removed) ----- */
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -43,7 +42,6 @@
       color: #1e3a2f;
     }
 
-    /* ----- filter bar ----- */
     .filter-bar {
       display: flex;
       align-items: center;
@@ -67,7 +65,6 @@
       cursor: pointer;
     }
 
-    /* ----- table ----- */
     .table-wrapper {
       background: white;
       border-radius: 24px;
@@ -159,7 +156,6 @@
 </head>
 <body>
   <div class="dashboard">
-    <!-- navbar without logout button -->
     <nav class="navbar">
       <span class="logo">BEKYA · admin</span>
     </nav>
@@ -202,75 +198,57 @@
       dbUsers.version(1).stores({ Users: '++id, name, phone, role' });
 
       const dbOutlet = new Dexie('RecycleOutletDB');
+      // ensure records store has userId index
       dbOutlet.version(2).stores({ records: '++id, sellerName, phone, materialType, weight, timestamp, points, userId' });
 
       await Promise.all([dbUsers.open(), dbOutlet.open()]);
 
-      // ----- get references -----
       const tbody = document.getElementById('tableBody');
       const roleFilter = document.getElementById('roleFilter');
       const statsNote = document.getElementById('statsNote');
 
-      // ----- helper: safely parse numeric value -----
-      function toNumber(val) {
-        if (val === null || val === undefined) return 0;
-        const num = parseFloat(val);
-        return isNaN(num) ? 0 : num;
-      }
-
-      // ----- helper: get seller materials from localStorage with numeric parsing -----
+      // ----- helper: get seller materials from localStorage (parse as numbers later) -----
       function getSellerMaterials() {
         const stored = localStorage.getItem('materials');
-        if (!stored) return [];
-        try {
-          const materials = JSON.parse(stored);
-          return materials.map(m => ({
-            ...m,
-            weight: toNumber(m.weight),
-            points: toNumber(m.points)
-          }));
-        } catch (e) {
-          console.error('Error parsing materials from localStorage', e);
-          return [];
-        }
+        return stored ? JSON.parse(stored) : [];
       }
 
-      // ----- load and display users -----
+      // ----- load and display users with CORRECT numeric sums -----
       async function loadUsers() {
-        // get all users from Dexie
         const users = await dbUsers.Users.toArray();
-
-        // get all seller materials (parsed)
-        const sellerMaterials = getSellerMaterials();
-
-        // get all outlet records, parse numeric fields
+        const sellerMaterials = getSellerMaterials(); 
         const outletRecords = await dbOutlet.records.toArray();
-        const parsedOutletRecords = outletRecords.map(r => ({
-          ...r,
-          weight: toNumber(r.weight),
-          points: toNumber(r.points)
-        }));
 
-        // build a map of totals per user
+        // --- build seller sums with explicit number parsing ---
         const sellerMap = new Map(); // userId -> { kg, points }
         sellerMaterials.forEach(m => {
           if (m.userId) {
             const id = m.userId;
             if (!sellerMap.has(id)) sellerMap.set(id, { kg: 0, points: 0 });
             const data = sellerMap.get(id);
-            data.kg += m.weight;
-            data.points += m.points;
+            
+            // SAFE NUMERIC PARSING: handle strings, nulls, undefined
+            const weight = parseFloat(m.weight) || 0;  // parseFloat('') → NaN → 0,  '0' → 0
+            const points = parseFloat(m.points) || 0;
+            
+            data.kg += weight;
+            data.points += points;
           }
         });
 
+        // --- build outlet sums with explicit number parsing ---
         const outletMap = new Map(); // userId -> { kg, points }
-        parsedOutletRecords.forEach(r => {
+        outletRecords.forEach(r => {
           if (r.userId) {
             const id = r.userId;
             if (!outletMap.has(id)) outletMap.set(id, { kg: 0, points: 0 });
             const data = outletMap.get(id);
-            data.kg += r.weight;
-            data.points += r.points;
+            
+            const weight = parseFloat(r.weight) || 0;
+            const points = parseFloat(r.points) || 0;
+            
+            data.kg += weight;
+            data.points += points;
           }
         });
 
@@ -303,12 +281,12 @@
 
         let html = '';
         filtered.forEach(u => {
-          // Conditional display based on role
           const isSeller = u.role === 'seller';
           const isOutlet = u.role === 'outlet';
-          // For seller: show seller columns, hide outlet columns
-          // For outlet: show outlet columns, hide seller columns
-          // For any other role (e.g., admin), show both
+          
+          // Format numbers: we want to display them cleanly (whole numbers or decimals)
+          // toFixed(2) removes floating point artifacts, but we keep as is for simplicity.
+          // We'll just append " g" for kg columns.
           html += `<tr>
             <td><strong>${escapeHtml(u.name)}</strong></td>
             <td>${escapeHtml(u.phone)}</td>
@@ -326,7 +304,10 @@
         });
         tbody.innerHTML = html;
 
-        statsNote.innerText = `Showing ${filtered.length} user(s) · Total KG (seller): ${filtered.reduce((s,u)=>s+u.sellerKg,0)} g · Total points (outlet): ${filtered.reduce((s,u)=>s+u.outletPoints,0)}`;
+        // optional stats (using filtered sums – keep as is but note that seller kg and outlet points totals are shown)
+        const totalSellerKg = filtered.reduce((s,u) => s + u.sellerKg, 0);
+        const totalOutletPoints = filtered.reduce((s,u) => s + u.outletPoints, 0);
+        statsNote.innerText = `Showing ${filtered.length} user(s) · Total KG (seller): ${totalSellerKg} g · Total points (outlet): ${totalOutletPoints}`;
 
         // attach delete events
         document.querySelectorAll('.delete-btn').forEach(btn => {
@@ -340,20 +321,21 @@
         });
       }
 
-      // ----- delete user completely -----
+      // ----- delete user completely (unchanged logic, but uses same getSellerMaterials) -----
       async function deleteUser(userId) {
         // 1. remove from Users table
         await dbUsers.Users.delete(userId);
 
-        // 2. remove seller materials (from localStorage) that belong to this user
-        const materials = getSellerMaterials();
+        // 2. remove from localStorage 'users' array – we skip because no userId stored there (as original)
+        // 3. remove seller materials (from localStorage) that belong to this user
+        const materials = getSellerMaterials(); // uses same helper
         const newMaterials = materials.filter(m => m.userId !== userId);
         localStorage.setItem('materials', JSON.stringify(newMaterials));
 
-        // 3. remove outlet records (from Dexie)
+        // 4. remove outlet records (from Dexie)
         await dbOutlet.records.where('userId').equals(userId).delete();
 
-        // 4. optional: remove from localStorage 'users' array (cannot reliably delete by id, skip)
+        // 5. (optional profile keys not touched)
       }
 
       // ----- escape HTML for safety -----
