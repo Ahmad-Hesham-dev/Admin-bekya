@@ -26,7 +26,7 @@
       margin: 0 auto;
     }
 
-    /* ----- navbar ----- */
+    /* ----- navbar (logout button removed) ----- */
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -41,22 +41,6 @@
       font-weight: 600;
       letter-spacing: -0.02em;
       color: #1e3a2f;
-    }
-
-    .logout-btn {
-      background: transparent;
-      border: 1.5px solid #1e3a2f;
-      color: #1e3a2f;
-      padding: 0.6rem 2rem;
-      font-weight: 600;
-      border-radius: 40px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .logout-btn:hover {
-      background: #1e3a2f;
-      color: white;
     }
 
     /* ----- filter bar ----- */
@@ -175,9 +159,9 @@
 </head>
 <body>
   <div class="dashboard">
+    <!-- navbar without logout button -->
     <nav class="navbar">
       <span class="logo">BEKYA · admin</span>
-      <button class="logout-btn" id="logoutBtn">Logout</button>
     </nav>
 
     <div class="filter-bar">
@@ -223,10 +207,9 @@
 
       await Promise.all([dbUsers.open(), dbOutlet.open()]);
 
-      // ----- get references -----
+      // ----- get references (logout button removed) -----
       const tbody = document.getElementById('tableBody');
       const roleFilter = document.getElementById('roleFilter');
-      const logoutBtn = document.getElementById('logoutBtn');
       const statsNote = document.getElementById('statsNote');
 
       // ----- helper: get seller materials from localStorage (filtered by userId) -----
@@ -294,14 +277,20 @@
 
         let html = '';
         filtered.forEach(u => {
+          // Conditional display based on role
+          const isSeller = u.role === 'seller';
+          const isOutlet = u.role === 'outlet';
+          // For seller: show seller columns, hide outlet columns
+          // For outlet: show outlet columns, hide seller columns
+          // For any other role (e.g., admin), show both
           html += `<tr>
             <td><strong>${escapeHtml(u.name)}</strong></td>
             <td>${escapeHtml(u.phone)}</td>
             <td><span class="role-badge">${escapeHtml(u.role)}</span></td>
-            <td>${u.sellerKg} g</td>
-            <td>${u.sellerPoints}</td>
-            <td>${u.outletKg} g</td>
-            <td>${u.outletPoints}</td>
+            <td>${isOutlet ? '' : u.sellerKg + ' g'}</td>
+            <td>${isOutlet ? '' : u.sellerPoints}</td>
+            <td>${isSeller ? '' : u.outletKg + ' g'}</td>
+            <td>${isSeller ? '' : u.outletPoints}</td>
             <td>
               <button class="delete-btn" data-id="${u.id}" data-name="${escapeHtml(u.name)}">
                 <i class="fas fa-trash-alt"></i> Delete
@@ -363,13 +352,6 @@
 
       // ----- filter change -----
       roleFilter.addEventListener('change', loadUsers);
-
-      // ----- logout (just clear currentUserId) -----
-      logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('currentUserId');
-        // optional: show message
-        alert('Logged out (currentUserId cleared)');
-      });
 
       // ----- initial load -----
       await loadUsers();
