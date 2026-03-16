@@ -202,28 +202,54 @@
       dbUsers.version(1).stores({ Users: '++id, name, phone, role' });
 
       const dbOutlet = new Dexie('RecycleOutletDB');
-      // make sure records store has userId index (version 2 from earlier)
       dbOutlet.version(2).stores({ records: '++id, sellerName, phone, materialType, weight, timestamp, points, userId' });
 
       await Promise.all([dbUsers.open(), dbOutlet.open()]);
 
-      // ----- get references (logout button removed) -----
+      // ----- get references -----
       const tbody = document.getElementById('tableBody');
       const roleFilter = document.getElementById('roleFilter');
       const statsNote = document.getElementById('statsNote');
 
-      // ----- helper: get seller materials from localStorage (filtered by userId) -----
+      // ----- helper: safely parse numeric value -----
+      function toNumber(val) {
+        if (val === null || val === undefined) return 0;
+        const num = parseFloat(val);
+        return isNaN(num) ? 0 : num;
+      }
+
+      // ----- helper: get seller materials from localStorage with numeric parsing -----
       function getSellerMaterials() {
         const stored = localStorage.getItem('materials');
-        return stored ? JSON.parse(stored) : [];
+        if (!stored) return [];
+        try {
+          const materials = JSON.parse(stored);
+          return materials.map(m => ({
+            ...m,
+            weight: toNumber(m.weight),
+            points: toNumber(m.points)
+          }));
+        } catch (e) {
+          console.error('Error parsing materials from localStorage', e);
+          return [];
+        }
       }
 
       // ----- load and display users -----
       async function loadUsers() {
         // get all users from Dexie
         const users = await dbUsers.Users.toArray();
-        const sellerMaterials = getSellerMaterials(); // all materials in this browser
+
+        // get all seller materials (parsed)
+        const sellerMaterials = getSellerMaterials();
+
+        // get all outlet records, parse numeric fields
         const outletRecords = await dbOutlet.records.toArray();
+        const parsedOutletRecords = outletRecords.map(r => ({
+          ...r,
+          weight: toNumber(r.weight),
+          points: toNumber(r.points)
+        }));
 
         // build a map of totals per user
         const sellerMap = new Map(); // userId -> { kg, points }
@@ -232,19 +258,19 @@
             const id = m.userId;
             if (!sellerMap.has(id)) sellerMap.set(id, { kg: 0, points: 0 });
             const data = sellerMap.get(id);
-            data.kg += m.weight || 0;
-            data.points += m.points || 0;
+            data.kg += m.weight;
+            data.points += m.points;
           }
         });
 
         const outletMap = new Map(); // userId -> { kg, points }
-        outletRecords.forEach(r => {
+        parsedOutletRecords.forEach(r => {
           if (r.userId) {
             const id = r.userId;
             if (!outletMap.has(id)) outletMap.set(id, { kg: 0, points: 0 });
             const data = outletMap.get(id);
-            data.kg += r.weight || 0;
-            data.points += r.points || 0;
+            data.kg += r.weight;
+            data.points += r.points;
           }
         });
 
@@ -319,24 +345,15 @@
         // 1. remove from Users table
         await dbUsers.Users.delete(userId);
 
-        // 2. remove from localStorage 'users' array (used by login)
-        const storedUsers = localStorage.getItem('users');
-        if (storedUsers) {
-          try {
-            let users = JSON.parse(storedUsers);
-            users = users.filter(u => u.username ? true : true); // we don't have userId in that array, so we rely on name? Actually the localStorage users array stores {username, phone, role} without id. So we cannot reliably delete by id there. We'll skip that to avoid deleting wrong user. This is a limitation of the existing login system.
-          } catch (e) {}
-        }
-
-        // 3. remove seller materials (from localStorage) that belong to this user
+        // 2. remove seller materials (from localStorage) that belong to this user
         const materials = getSellerMaterials();
         const newMaterials = materials.filter(m => m.userId !== userId);
         localStorage.setItem('materials', JSON.stringify(newMaterials));
 
-        // 4. remove outlet records (from Dexie)
+        // 3. remove outlet records (from Dexie)
         await dbOutlet.records.where('userId').equals(userId).delete();
 
-        // 5. optionally remove from localStorage profile keys? Not needed because they belong to current logged-in user only.
+        // 4. optional: remove from localStorage 'users' array (cannot reliably delete by id, skip)
       }
 
       // ----- escape HTML for safety -----
