@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BEKYA · admin panel (fixed sums)</title>
+  <title>BEKYA · admin panel</title>
   <!-- Dexie.js -->
   <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
   <style>
@@ -166,6 +166,7 @@
         <option value="all">All users</option>
         <option value="seller">Sellers</option>
         <option value="outlet">Outlets</option>
+        <option value="admin">Admins</option>
       </select>
     </div>
 
@@ -177,9 +178,9 @@
             <th>Phone</th>
             <th>Role</th>
             <th>Seller KG</th>
-            <th>Seller points</th>
+            <th>Seller Points</th>
             <th>Outlet KG</th>
-            <th>Outlet points</th>
+            <th>Outlet Points</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -193,74 +194,72 @@
 
   <script>
     (async function() {
-      // ----- open both databases -----
+      // ────────────────────────────────────────────────
+      //               Open Databases
+      // ────────────────────────────────────────────────
       const dbUsers = new Dexie('BEKYADatabase');
-      dbUsers.version(1).stores({ Users: '++id, name, phone, role' });
+      dbUsers.version(1).stores({ Users: '++id, name, phone, role, weight, points' });
 
       const dbOutlet = new Dexie('RecycleOutletDB');
-      // ensure records store has userId index
-      dbOutlet.version(2).stores({ records: '++id, sellerName, phone, materialType, materialweight, timestamp, materialpoints, userId' });
+      dbOutlet.version(2).stores({ records: '++id, sellerName, phone, materialType, weight, timestamp, points, userId' });
 
       await Promise.all([dbUsers.open(), dbOutlet.open()]);
 
+      // ────────────────────────────────────────────────
+      //               DOM Elements
+      // ────────────────────────────────────────────────
       const tbody = document.getElementById('tableBody');
       const roleFilter = document.getElementById('roleFilter');
       const statsNote = document.getElementById('statsNote');
 
-      // ----- helper: get seller materials from localStorage (parse as numbers later) -----
+      // ────────────────────────────────────────────────
+      //        Helper: Get seller materials from localStorage
+      // ────────────────────────────────────────────────
       function getSellerMaterials() {
         const stored = localStorage.getItem('materials');
         return stored ? JSON.parse(stored) : [];
       }
 
-      // ----- load and display users with CORRECT numeric sums -----
+      // ────────────────────────────────────────────────
+      //               Load & Display Users
+      // ────────────────────────────────────────────────
       async function loadUsers() {
         const users = await dbUsers.Users.toArray();
-        const sellerMaterials = getSellerMaterials(); 
+        const sellerMaterials = getSellerMaterials();
         const outletRecords = await dbOutlet.records.toArray();
 
-        // --- build seller sums with explicit number parsing ---
-        const sellerMap = new Map(); // userId -> { kg, points }
+        // ── Build totals per user ───────────────────────────────
+        const sellerMap = new Map(); // userId (number) → {kg, points}
         sellerMaterials.forEach(m => {
-          if (m.userId) {
-            const id = m.userId;
-            if (!sellerMap.has(id)) sellerMap.set(id, { kg: 0, points: 0 });
-            const data = sellerMap.get(id);
-            
-            // SAFE NUMERIC PARSING: handle strings, nulls, undefined
-            const weight = parseFloat(m.weight) || 0;  // parseFloat('') → NaN → 0,  '0' → 0
-            const points = parseFloat(m.points) || 0;
-            
-            data.kg += weight;
-            data.points += points;
+          const userId = Number(m.userId);
+          if (userId && !isNaN(userId)) {
+            if (!sellerMap.has(userId)) sellerMap.set(userId, { kg: 0, points: 0 });
+            const data = sellerMap.get(userId);
+            data.kg    += Number(m.weight)  || 0;
+            data.points += Number(m.points) || 0;
           }
         });
 
-        // --- build outlet sums with explicit number parsing ---
-        const outletMap = new Map(); // userId -> { kg, points }
+        const outletMap = new Map();
         outletRecords.forEach(r => {
-          if (r.userId) {
-            const id = r.userId;
-            if (!outletMap.has(id)) outletMap.set(id, { kg: 0, points: 0 });
-            const data = outletMap.get(id);
-            
-            const weight = parseFloat(r.weight) || 0;
-            const points = parseFloat(r.points) || 0;
-            
-            data.kg += weight;
-            data.points += points;
+          const userId = Number(r.userId);
+          if (userId && !isNaN(userId)) {
+            if (!outletMap.has(userId)) outletMap.set(userId, { kg: 0, points: 0 });
+            const data = outletMap.get(userId);
+            data.kg    += Number(r.weight)  || 0;
+            data.points += Number(r.points) || 0;
           }
         });
 
-        // combine with user list
+        // ── Combine data ────────────────────────────────────────
         const userList = users.map(u => {
           const seller = sellerMap.get(u.id) || { kg: 0, points: 0 };
           const outlet = outletMap.get(u.id) || { kg: 0, points: 0 };
           return {
             id: u.id,
-            name: u.name,
-            phone: u.phone,
-            role: u.role,
+            name: u.name || 'غير معروف',
+            phone: u.phone || 'غير محدد',
+            role: u.role || 'غير معروف',
             sellerKg: seller.kg,
             sellerPoints: seller.points,
             outletKg: outlet.kg,
@@ -268,13 +267,16 @@
           };
         });
 
-        // apply role filter
+        // Apply filter
         const filter = roleFilter.value;
-        const filtered = filter === 'all' ? userList : userList.filter(u => u.role === filter);
+        let filtered = userList;
+        if (filter !== 'all') {
+          filtered = userList.filter(u => u.role === filter);
+        }
 
-        // render table
+        // Render
         if (filtered.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="empty-message">No users found</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="empty-message">ما فيش مستخدمين بهذا الفلتر</td></tr>`;
           statsNote.innerText = '';
           return;
         }
@@ -283,64 +285,67 @@
         filtered.forEach(u => {
           const isSeller = u.role === 'seller';
           const isOutlet = u.role === 'outlet';
-          
-          // Format numbers: we want to display them cleanly (whole numbers or decimals)
-          // toFixed(2) removes floating point artifacts, but we keep as is for simplicity.
-          // We'll just append " g" for kg columns.
-          html += `<tr>
-            <td><strong>${escapeHtml(u.name)}</strong></td>
-            <td>${escapeHtml(u.phone)}</td>
-            <td><span class="role-badge">${escapeHtml(u.role)}</span></td>
-            <td>${isOutlet ? '' : u.sellerKg + ' g'}</td>
-            <td>${isOutlet ? '' : u.sellerPoints}</td>
-            <td>${isSeller ? '' : u.outletKg + ' g'}</td>
-            <td>${isSeller ? '' : u.outletPoints}</td>
-            <td>
-              <button class="delete-btn" data-id="${u.id}" data-name="${escapeHtml(u.name)}">
-                <i class="fas fa-trash-alt"></i> Delete
-              </button>
-            </td>
-          </tr>`;
+
+          html += `
+            <tr>
+              <td><strong>${escapeHtml(u.name)}</strong></td>
+              <td>${escapeHtml(u.phone)}</td>
+              <td><span class="role-badge">${escapeHtml(u.role)}</span></td>
+              <td>${isOutlet ? '—' : (u.sellerKg).toFixed(2) + ' kg'}</td>
+              <td>${isOutlet ? '—' : u.sellerPoints.toFixed(0)}</td>
+              <td>${isSeller ? '—' : (u.outletKg).toFixed(2) + ' kg'}</td>
+              <td>${isSeller ? '—' : u.outletPoints.toFixed(0)}</td>
+              <td>
+                <button class="delete-btn" data-id="${u.id}" data-name="${escapeHtml(u.name)}">
+                  <i class="fas fa-trash-alt"></i> حذف
+                </button>
+              </td>
+            </tr>`;
         });
+
         tbody.innerHTML = html;
 
-        // optional stats (using filtered sums – keep as is but note that seller kg and outlet points totals are shown)
-        const totalSellerKg = filtered.reduce((s,u) => s + u.sellerKg, 0);
-        const totalOutletPoints = filtered.reduce((s,u) => s + u.outletPoints, 0);
-        statsNote.innerText = `Showing ${filtered.length} user(s) · Total KG (seller): ${totalSellerKg} g · Total points (outlet): ${totalOutletPoints}`;
+        // Stats
+        const totalSellerKg = filtered.reduce((sum, u) => sum + u.sellerKg, 0);
+        const totalOutletPoints = filtered.reduce((sum, u) => sum + u.outletPoints, 0);
+        statsNote.innerText = `عرض ${filtered.length} مستخدم · إجمالي كيلو (بائعين): ${totalSellerKg.toFixed(2)} kg · إجمالي نقاط (منافذ): ${totalOutletPoints.toFixed(0)}`;
 
-        // attach delete events
+        // Attach delete events
         document.querySelectorAll('.delete-btn').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
+          btn.addEventListener('click', async () => {
             const userId = Number(btn.dataset.id);
             const userName = btn.dataset.name;
-            if (!confirm(`Delete user "${userName}" and all their data? This cannot be undone.`)) return;
+            if (!confirm(`هتحذف المستخدم "${userName}" وكل بياناته؟ العملية دي مش هترجع تاني.`)) return;
             await deleteUser(userId);
-            await loadUsers(); // refresh
+            await loadUsers();
           });
         });
       }
 
-      // ----- delete user completely (unchanged logic, but uses same getSellerMaterials) -----
+      // ────────────────────────────────────────────────
+      //               Delete User Completely
+      // ────────────────────────────────────────────────
       async function deleteUser(userId) {
-        // 1. remove from Users table
+        // 1. حذف من جدول Users
         await dbUsers.Users.delete(userId);
 
-        // 2. remove from localStorage 'users' array – we skip because no userId stored there (as original)
-        // 3. remove seller materials (from localStorage) that belong to this user
-        const materials = getSellerMaterials(); // uses same helper
-        const newMaterials = materials.filter(m => m.userId !== userId);
-        localStorage.setItem('materials', JSON.stringify(newMaterials));
+        // 2. حذف المواد اللي جمعها (Seller) من localStorage
+        const materials = getSellerMaterials();
+        const remainingMaterials = materials.filter(m => Number(m.userId) !== userId);
+        localStorage.setItem('materials', JSON.stringify(remainingMaterials));
 
-        // 4. remove outlet records (from Dexie)
+        // 3. حذف السجلات اللي سجلها (Outlet)
         await dbOutlet.records.where('userId').equals(userId).delete();
 
-        // 5. (optional profile keys not touched)
+        // ملحوظة: لو عندك localStorage 'users' للـ login، ممكن تحتاج تضيف حذف هناك كمان
+        // لكن حالياً معظم الأنظمة بتعتمد على Dexie id مش localStorage users array
       }
 
-      // ----- escape HTML for safety -----
+      // ────────────────────────────────────────────────
+      //               HTML Escape
+      // ────────────────────────────────────────────────
       function escapeHtml(unsafe) {
-        if (!unsafe) return unsafe;
+        if (unsafe == null) return '';
         return String(unsafe)
           .replace(/&/g, '&amp;')
           .replace(/</g, '&lt;')
@@ -349,16 +354,16 @@
           .replace(/'/g, '&#039;');
       }
 
-      // ----- filter change -----
+      // ────────────────────────────────────────────────
+      //               Event Listeners & Init
+      // ────────────────────────────────────────────────
       roleFilter.addEventListener('change', loadUsers);
-
-      // ----- initial load -----
       await loadUsers();
 
-      // Font Awesome for icons (optional but nice)
+      // Font Awesome (اختياري)
       const fa = document.createElement('link');
       fa.rel = 'stylesheet';
-      fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+      fa.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';
       document.head.appendChild(fa);
     })();
   </script>
